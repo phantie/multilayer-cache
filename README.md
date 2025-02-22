@@ -100,11 +100,11 @@ def cache_layer(
 
 For nesting of layers L(0..N) to be possible (where L_0 is the most inner layer and L_N is the most outer layer)
 
-For T(0..N) must be such as there must exist a one-way transformation (morfism) T_0 -> T_N.
+T(0..N) must be such that, there must exist a one-way transformation (morfism) T_0 -> T_N.
 Simply, there must be a way to reduce a **value** passing from *inner to outer* layer.
 For example, it works with bytes -> decoded bytes -> parsed json
 
-For K(0..N) must be such as there must exist a one-way transformation (morfism) K_N -> K_0.
+K(0..N) must be such that, there must exist a one-way transformation (morfism) K_N -> K_0.
 Simply, there must be a way to reduce a **key** passing from *outer to inner* layer.
 
 ### [multilayer_cache](https://github.com/phantie/multilayer-cache) is a library in Github containing cache_layer among other things (asynchronous and type hinted cache layer, examples)
