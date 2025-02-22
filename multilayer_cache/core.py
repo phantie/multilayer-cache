@@ -30,23 +30,6 @@ CACHE_MISS = CACHE_MISS()
 KEY_NOT_FOUND = KEY_NOT_FOUND()
 
 
-
-class CacheResultFound(BaseModel, Generic[T]):
-    choice: Literal["found"] = "found"
-    value: T
-
-class CacheResultNotFound(BaseModel):
-    choice: Literal["not_found"] = "not_found"
-
-class CacheResultError(BaseModel):
-    choice: Literal["error"] = "error"
-    error: Exception
-
-class CacheResult(BaseModel, Generic[T]):
-    value: Annotated[CacheResultFound[T] | CacheResultNotFound | CacheResultError, pydantic.Field(discriminator="choice")]
-
-
-
 class CacheLayerInspectHit(BaseModel, Generic[K]):
     choice: Literal["hit"] = "hit"
     key: K
@@ -58,40 +41,6 @@ class CacheLayerInspectMiss(BaseModel, Generic[K]):
 class CacheLayerInspect(BaseModel, Generic[K]):
     identifier: str
     value: Annotated[CacheLayerInspectHit[K] | CacheLayerInspectMiss[K], pydantic.Field(discriminator="choice")]
-
-
-
-### class CacheName(...GenericArgs [T, C, S]) todo add cache key type
-###
-###     T type cache returns
-###     C type inner cache stores values in
-###     S type on_cache_miss_source returns
-###
-###     on_cache_miss_source (key part -> S)
-###
-###     getter -> key
-###     getter -> (S -> T)
-###
-###     serialize -> (T, C)
-###     deserialize -> (C, T)
-###
-###     inner_cache
-###
-###
-###     def get(self, getter)
-###         getter -> key
-###
-###         inner_cache (key)
-###             hit:
-###                 deserialize
-###             miss:
-###                 on_cache_miss_source (key part)
-###                 getter -> (S -> T)
-###                 inner_cache[key]=serialize
-###                 serialize
-###
-###
-###
 
 
 def cache_layer(
@@ -138,7 +87,6 @@ def cache_layer(
         return cached
     
 
-
 async def async_cache_layer(
     get_cache_key: Callable[[], Awaitable[K]],
     get_cache_value: Callable[[K, D], Awaitable[T]],
@@ -182,4 +130,36 @@ async def async_cache_layer(
 
         return cached
 
+
+### class CacheName(...GenericArgs [T, C, S]) todo add cache key type
+###
+###     T type cache returns
+###     C type inner cache stores values in
+###     S type on_cache_miss_source returns
+###
+###     on_cache_miss_source (key part -> S)
+###
+###     getter -> key
+###     getter -> (S -> T)
+###
+###     serialize -> (T, C)
+###     deserialize -> (C, T)
+###
+###     inner_cache
+###
+###
+###     def get(self, getter)
+###         getter -> key
+###
+###         inner_cache (key)
+###             hit:
+###                 deserialize
+###             miss:
+###                 on_cache_miss_source (key part)
+###                 getter -> (S -> T)
+###                 inner_cache[key]=serialize
+###                 serialize
+###
+###
+###
 
