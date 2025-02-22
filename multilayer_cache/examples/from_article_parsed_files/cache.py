@@ -1,4 +1,5 @@
 from multilayer_cache import cache_layer
+from multilayer_cache import type_hinted_cache_layer
 from multilayer_cache import KEY_NOT_FOUND
 
 import json
@@ -119,13 +120,15 @@ class JsonParser:
     def parse(self, value: FileContents) -> ParsedFile:
         return ParsedFile.model_validate_json(value)
 
+
 parser = JsonParser()
 
-ParsedFilesInnerCache: TypeAlias = dict[tuple[BlobId, ParserVersion], ParsedFileCompressed]
+ParsedFilesKey: TypeAlias = tuple[BlobId, ParserVersion]
+ParsedFilesInnerCache: TypeAlias = dict[ParsedFilesKey, ParsedFileCompressed]
 
 parsed_files_inner_cache: FilesInnerCache = {}
 
-def on_cache_miss_source(cache_key: tuple[BlobId, ParserVersion], default) -> ParsedFile:
+def on_cache_miss_source(cache_key: ParsedFilesKey, default) -> ParsedFile:
     # inner layer requires only blob_id
     blob_id, _parser_version = cache_key
 
@@ -146,12 +149,10 @@ def on_cache_miss_source(cache_key: tuple[BlobId, ParserVersion], default) -> Pa
     return value
 
 
-def set_cache_value(key, value: ParsedFile):
-    parsed_files_inner_cache.update({key: value.model_dump_json(by_alias=True)})
-
-
 parsed_files_cache_layer_partial = partial(
-    cache_layer,
+    # type_hinted_cache_layer allows to type hint ahead of type
+    # making it better to work with lambdas
+    type_hinted_cache_layer[ParsedFile, ParsedFilesKey, Any].new,
     # get_cache_key=
     on_cache_miss_source=on_cache_miss_source,
     get_cache_value = lambda key, default: (
@@ -159,8 +160,8 @@ parsed_files_cache_layer_partial = partial(
         if (cached := parsed_files_inner_cache.get(key, default)) is not default 
         else default
     ),
-    # type hinting cannot recognize the argument types in some cases so specify explicitly in signature
-    set_cache_value=set_cache_value,
+    set_cache_value=lambda key, value: parsed_files_inner_cache.update({key: value.model_dump_json(by_alias=True)}),
+    # get_default=
     get_identifier=lambda: "parsed_files",
 )
 

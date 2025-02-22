@@ -158,6 +158,50 @@ async def async_cache_layer(
         return cached
 
 
+class type_hinted_cache_layer(Generic[T, K, D]):
+    @staticmethod
+    def new(
+        get_cache_key: Callable[[], K],
+        get_cache_value: Callable[[K, D], T],
+        set_cache_value: Callable[[K, T], None],
+        on_cache_miss_source: Callable[[K, D], T],
+        get_default: Callable[[], D],
+        get_identifier: Callable[[], Any],
+        inspect: Callable[[CacheLayerInspect], None] = lambda _: None,
+    ) -> T:
+        return cache_layer(
+            get_cache_key=get_cache_key,
+            get_cache_value=get_cache_value,
+            set_cache_value=set_cache_value,
+            on_cache_miss_source=on_cache_miss_source,
+            get_default=get_default,
+            get_identifier=get_identifier,
+            inspect=inspect,
+        )
+
+
+class type_hinted_async_cache_layer(Generic[T, K, D]):
+    @staticmethod
+    def new(
+        get_cache_key: Callable[[], Awaitable[K]],
+        get_cache_value: Callable[[K, D], Awaitable[T]],
+        set_cache_value: Callable[[K, T], Awaitable[None]],
+        on_cache_miss_source: Callable[[K, D], Awaitable[T]],
+        get_default: Callable[[], Awaitable[D]],
+        get_identifier: Callable[[], Awaitable[Any]],
+        inspect: Callable[[CacheLayerInspect], Awaitable[None]] = to_async(lambda _: None),
+    ) -> Awaitable[T]:
+        return async_cache_layer(
+            get_cache_key=get_cache_key,
+            get_cache_value=get_cache_value,
+            set_cache_value=set_cache_value,
+            on_cache_miss_source=on_cache_miss_source,
+            get_default=get_default,
+            get_identifier=get_identifier,
+            inspect=inspect,
+        )
+
+
 ### class CacheName(...GenericArgs [T, C, S]) todo add cache key type
 ###
 ###     T type cache returns
