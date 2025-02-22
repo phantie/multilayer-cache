@@ -1,7 +1,7 @@
 from multilayer_cache.core import cache_layer
 from multilayer_cache.core import KEY_NOT_FOUND
-from multilayer_cache.examples.parsed_cached_bucket.defs import BlobId
-from multilayer_cache.examples.parsed_cached_bucket.parser import Parser
+from multilayer_cache.examples.parsed_files.defs import BlobId
+from multilayer_cache.examples.parsed_files.parser import Parser
 
 from typing import TypeAlias
 import json
@@ -30,7 +30,7 @@ cache_layer_partial = partial(
     # set_cache_value
     # on_cache_miss_source=on_cache_miss_source,
     get_default=lambda: KEY_NOT_FOUND,
-    get_identifier=lambda: "parsed_jsons",
+    get_identifier=lambda: "parsed_cached_files",
     # inspect
 )
 

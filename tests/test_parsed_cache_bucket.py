@@ -3,14 +3,14 @@ from multilayer_cache.core import KEY_NOT_FOUND
 from multilayer_cache.core import CacheLayerInspect
 from multilayer_cache.core import CacheLayerInspectHit
 from multilayer_cache.core import CacheLayerInspectMiss
-from multilayer_cache.examples.parsed_cached_bucket.defs import BlobId
-from multilayer_cache.examples.parsed_cached_bucket.defs import ParserVersion
-from multilayer_cache.examples.parsed_cached_bucket.defs import FileContents
-from multilayer_cache.examples.parsed_cached_bucket.bucket import Bucket
-from multilayer_cache.examples.parsed_cached_bucket import loaded_jsons_from_bucket
-from multilayer_cache.examples.parsed_cached_bucket import parsed_jsons
-from multilayer_cache.examples.parsed_cached_bucket.parser import JsonParser
-from multilayer_cache.examples.parsed_cached_bucket.parser import Parser
+from multilayer_cache.examples.parsed_files.defs import BlobId
+from multilayer_cache.examples.parsed_files.defs import ParserVersion
+from multilayer_cache.examples.parsed_files.defs import FileContents
+from multilayer_cache.examples.parsed_files.bucket import Bucket
+from multilayer_cache.examples.parsed_files import parsed_cached_files
+from multilayer_cache.examples.parsed_files import cached_files
+from multilayer_cache.examples.parsed_files.parser import JsonParser
+from multilayer_cache.examples.parsed_files.parser import Parser
 
 import json
 from functools import partial
@@ -47,19 +47,19 @@ def test_foo():
 
     parser = JsonParser()
 
-    loaded_jsons_from_bucket_inner_cache = {}
+    cached_files_inner_cache = {}
 
-    loaded_jsons_from_bucket_cache = partial(
-        loaded_jsons_from_bucket.cache_layer_partial,
-        get_cache_value=loaded_jsons_from_bucket.bakein_get_cache_value(loaded_jsons_from_bucket_inner_cache),
-        set_cache_value=loaded_jsons_from_bucket.bakein_set_cache_value(loaded_jsons_from_bucket_inner_cache),
-        on_cache_miss_source=loaded_jsons_from_bucket.bakein_on_cache_miss_source(bucket),
+    cached_files_cache = partial(
+        cached_files.cache_layer_partial,
+        get_cache_value=cached_files.bakein_get_cache_value(cached_files_inner_cache),
+        set_cache_value=cached_files.bakein_set_cache_value(cached_files_inner_cache),
+        on_cache_miss_source=cached_files.bakein_on_cache_miss_source(bucket),
         inspect=inspect,
     )
 
     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    result = loaded_jsons_from_bucket_cache(
+    result = cached_files_cache(
         get_cache_key=lambda: "a",
         get_default=lambda: KEY_NOT_FOUND,
     )
@@ -70,7 +70,7 @@ def test_foo():
 
     match inspect_queue:
         case [
-            CacheLayerInspect(identifier='loaded_jsons', value=CacheLayerInspectMiss(key='a')),
+            CacheLayerInspect(identifier='cached_files', value=CacheLayerInspectMiss(key='a')),
         ]:
             pass
         case _:
@@ -83,7 +83,7 @@ def test_foo():
 
     def on_cache_miss_source(cache_key: tuple[BlobId, ParserVersion], default):
         blob_id, _ = cache_key
-        value = loaded_jsons_from_bucket_cache(
+        value = cached_files_cache(
             get_cache_key=lambda: blob_id,
             get_default=lambda: default,
         )
@@ -95,19 +95,19 @@ def test_foo():
 
         return value
 
-    parsed_jsons_inner_cache = {}
+    parsed_cached_files_inner_cache = {}
 
-    parsed_jsons_cache = partial(
-        parsed_jsons.cache_layer_partial,
-        get_cache_value=parsed_jsons.bakein_get_cache_value(parsed_jsons_inner_cache),
-        set_cache_value=parsed_jsons.bakein_set_cache_value(parsed_jsons_inner_cache),
+    parsed_cached_files_cache = partial(
+        parsed_cached_files.cache_layer_partial,
+        get_cache_value=parsed_cached_files.bakein_get_cache_value(parsed_cached_files_inner_cache),
+        set_cache_value=parsed_cached_files.bakein_set_cache_value(parsed_cached_files_inner_cache),
         on_cache_miss_source=on_cache_miss_source,
         inspect=inspect,
     )
 
     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    result = parsed_jsons_cache(
+    result = parsed_cached_files_cache(
         get_cache_key=lambda: ("a", parser.version()),
     )
 
@@ -117,8 +117,8 @@ def test_foo():
 
     match inspect_queue:
         case [
-            CacheLayerInspect(identifier='parsed_jsons', value=CacheLayerInspectMiss(key=('a', '0'))),
-            CacheLayerInspect(identifier='loaded_jsons', value=CacheLayerInspectHit(key='a')),
+            CacheLayerInspect(identifier='parsed_cached_files', value=CacheLayerInspectMiss(key=('a', '0'))),
+            CacheLayerInspect(identifier='cached_files', value=CacheLayerInspectHit(key='a')),
         ]:
             pass
         case _:
@@ -130,7 +130,7 @@ def test_foo():
 
     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    result = parsed_jsons_cache(
+    result = parsed_cached_files_cache(
         get_cache_key=lambda: ("a", parser.version()),
     )
 
@@ -140,7 +140,7 @@ def test_foo():
 
     match inspect_queue:
         case [
-            CacheLayerInspect(identifier='parsed_jsons', value=CacheLayerInspectHit(key=('a', '0'))),
+            CacheLayerInspect(identifier='parsed_cached_files', value=CacheLayerInspectHit(key=('a', '0'))),
         ]:
             pass
         case _:
@@ -152,7 +152,7 @@ def test_foo():
 
     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    result = parsed_jsons_cache(
+    result = parsed_cached_files_cache(
         get_cache_key=lambda: ("c", parser.version()),
     )
 
@@ -162,8 +162,8 @@ def test_foo():
 
     match inspect_queue:
         case [
-            CacheLayerInspect(identifier='parsed_jsons', value=CacheLayerInspectMiss(choice='miss', key=('c', '0'))),
-            CacheLayerInspect(identifier='loaded_jsons', value=CacheLayerInspectMiss(choice='miss', key='c')),
+            CacheLayerInspect(identifier='parsed_cached_files', value=CacheLayerInspectMiss(choice='miss', key=('c', '0'))),
+            CacheLayerInspect(identifier='cached_files', value=CacheLayerInspectMiss(choice='miss', key='c')),
         ]:
             pass
         case _:
@@ -174,6 +174,6 @@ def test_foo():
     #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     # log(f"{bucket=!r}")
-    # log(f"{loaded_jsons_from_bucket_inner_cache=!r}")
-    # log(f"{parsed_jsons_inner_cache=!r}")
+    # log(f"{cached_files_inner_cache=!r}")
+    # log(f"{parsed_cached_files_inner_cache=!r}")
 

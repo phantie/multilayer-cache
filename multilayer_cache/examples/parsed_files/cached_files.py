@@ -1,9 +1,9 @@
 from multilayer_cache.core import cache_layer
 from multilayer_cache.core import KEY_NOT_FOUND
-from multilayer_cache.examples.parsed_cached_bucket.defs import BlobId
-from multilayer_cache.examples.parsed_cached_bucket.defs import FileContents
-from multilayer_cache.examples.parsed_cached_bucket.defs import BaseModel
-from multilayer_cache.examples.parsed_cached_bucket.bucket import Bucket
+from multilayer_cache.examples.parsed_files.defs import BlobId
+from multilayer_cache.examples.parsed_files.defs import FileContents
+from multilayer_cache.examples.parsed_files.defs import BaseModel
+from multilayer_cache.examples.parsed_files.bucket import Bucket
 
 from typing import TypeAlias
 from functools import partial
@@ -36,7 +36,7 @@ cache_layer_partial = partial(
     # set_cache_value
     # on_cache_miss_source
     get_default=lambda: KEY_NOT_FOUND,
-    get_identifier=lambda: "loaded_jsons",
+    get_identifier=lambda: "cached_files",
     # inspect
 )
 

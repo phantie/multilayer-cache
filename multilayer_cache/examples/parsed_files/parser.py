@@ -1,5 +1,5 @@
-from multilayer_cache.examples.parsed_cached_bucket.defs import ParserVersion
-from multilayer_cache.examples.parsed_cached_bucket.defs import T
+from multilayer_cache.examples.parsed_files.defs import ParserVersion
+from multilayer_cache.examples.parsed_files.defs import T
 
 from typing import Protocol
 from typing import Generic
