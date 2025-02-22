@@ -13,9 +13,9 @@ import pydantic
 
 # Represents value type a cache returns
 T = TypeVar("T")
-# Represent [K]ey used for fetching from inner cache or source
+# Represent [K]ey used for fetching from local cache or source
 K = TypeVar("K")
-# Represents unique [D]efault value that should be returned on not found key
+# Represents unique (in "is" operation) [D]efault value that should be returned on not found key
 D = TypeVar("D")
 
 
@@ -44,6 +44,7 @@ class CacheLayerInspect(BaseModel, Generic[K]):
 
 
 def cache_layer(
+    # 
     get_cache_key: Callable[[], K],
     get_cache_value: Callable[[K, D], T],
     set_cache_value: Callable[[K, T], None],
@@ -134,7 +135,7 @@ async def async_cache_layer(
 ### class CacheName(...GenericArgs [T, C, S]) todo add cache key type
 ###
 ###     T type cache returns
-###     C type inner cache stores values in
+###     C type local cache stores values in
 ###     S type on_cache_miss_source returns
 ###
 ###     on_cache_miss_source (key part -> S)
@@ -145,19 +146,19 @@ async def async_cache_layer(
 ###     serialize -> (T, C)
 ###     deserialize -> (C, T)
 ###
-###     inner_cache
+###     local_cache
 ###
 ###
 ###     def get(self, getter)
 ###         getter -> key
 ###
-###         inner_cache (key)
+###         local_cache (key)
 ###             hit:
 ###                 deserialize
 ###             miss:
 ###                 on_cache_miss_source (key part)
 ###                 getter -> (S -> T)
-###                 inner_cache[key]=serialize
+###                 local_cache[key]=serialize
 ###                 serialize
 ###
 ###
