@@ -1,10 +1,10 @@
 from multilayer_cache.core import async_cache_layer
 from multilayer_cache.core import KEY_NOT_FOUND
 from multilayer_cache.util import to_async
-from multilayer_cache.examples.async_cached_bucket.defs import BlobId
-from multilayer_cache.examples.async_cached_bucket.defs import FileContents
-from multilayer_cache.examples.async_cached_bucket.defs import BaseModel
-from multilayer_cache.examples.async_cached_bucket.bucket import Bucket
+from multilayer_cache.examples.async_parsed_files.defs import BlobId
+from multilayer_cache.examples.async_parsed_files.defs import FileContents
+from multilayer_cache.examples.async_parsed_files.defs import BaseModel
+from multilayer_cache.examples.async_parsed_files.bucket import Bucket
 
 from typing import TypeAlias
 from functools import partial
@@ -38,7 +38,7 @@ cache_layer_partial = partial(
     # set_cache_value
     # on_cache_miss_source
     get_default=to_async(lambda: KEY_NOT_FOUND),
-    get_identifier=to_async(lambda: "loaded_jsons"),
+    get_identifier=to_async(lambda: "cached_files"),
     # inspect
 )
 

@@ -4,10 +4,10 @@ from multilayer_cache.core import CacheLayerInspect
 from multilayer_cache.core import CacheLayerInspectHit
 from multilayer_cache.core import CacheLayerInspectMiss
 from multilayer_cache.util import to_async
-from multilayer_cache.examples.async_cached_bucket.defs import BlobId
-from multilayer_cache.examples.async_cached_bucket.defs import FileContents
-from multilayer_cache.examples.async_cached_bucket.bucket import Bucket
-from multilayer_cache.examples.async_cached_bucket import loaded_jsons_from_bucket
+from multilayer_cache.examples.async_parsed_files.defs import BlobId
+from multilayer_cache.examples.async_parsed_files.defs import FileContents
+from multilayer_cache.examples.async_parsed_files.bucket import Bucket
+from multilayer_cache.examples.async_parsed_files import cached_files
 
 import json
 from functools import partial
@@ -44,20 +44,20 @@ async def test_foo_async():
     bucket = get_test_bucket()
 
 
-    loaded_jsons_from_bucket_inner_cache = {}
+    cached_files_from_bucket_inner_cache = {}
 
-    loaded_jsons_from_bucket_cache = partial(
-        loaded_jsons_from_bucket.cache_layer_partial,
-        get_cache_value=loaded_jsons_from_bucket.bakein_get_cache_value(loaded_jsons_from_bucket_inner_cache),
-        set_cache_value=loaded_jsons_from_bucket.bakein_set_cache_value(loaded_jsons_from_bucket_inner_cache),
-        on_cache_miss_source=loaded_jsons_from_bucket.bakein_on_cache_miss_source(bucket),
+    cached_files_from_bucket_cache = partial(
+        cached_files.cache_layer_partial,
+        get_cache_value=cached_files.bakein_get_cache_value(cached_files_from_bucket_inner_cache),
+        set_cache_value=cached_files.bakein_set_cache_value(cached_files_from_bucket_inner_cache),
+        on_cache_miss_source=cached_files.bakein_on_cache_miss_source(bucket),
         inspect=to_async(inspect),
     )
 
 
     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    result = await loaded_jsons_from_bucket_cache(
+    result = await cached_files_from_bucket_cache(
         get_cache_key=to_async(lambda: "a"),
         get_default=to_async(lambda: KEY_NOT_FOUND),
     )
@@ -68,7 +68,7 @@ async def test_foo_async():
 
     match inspect_queue:
         case [
-            CacheLayerInspect(identifier='loaded_jsons', value=CacheLayerInspectMiss(key='a')),
+            CacheLayerInspect(identifier='cached_files', value=CacheLayerInspectMiss(key='a')),
         ]:
             pass
         case _:
