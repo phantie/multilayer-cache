@@ -14,6 +14,7 @@ from typing import Optional
 
 import pydantic
 
+D = TypeVar("D")
 
 ########################################################################
 
@@ -25,7 +26,7 @@ FileContents: TypeAlias = str
 class Bucket(pydantic.BaseModel):
     files: dict[BlobId, FileContents]
 
-    def get(self, blob_id: BlobId, default) -> FileContents:
+    def get(self, blob_id: BlobId, default: D) -> FileContents | D:
         return self.files.get(blob_id, default)
 
 bucket = Bucket(
@@ -49,8 +50,6 @@ files_inner_cache: FilesInnerCache = {}
 
 # let's match against generated events
 events = []
-
-D = TypeVar("D")
 
 def on_cache_miss_source(cache_key: BlobId, default: D) -> FileContents | D:
     blob_id = cache_key
@@ -232,4 +231,3 @@ def get_parsed_file(blob_id: BlobId, parser: JsonParser) -> Optional[ParsedFile]
     )
 
     return None if value is KEY_NOT_FOUND else value
-
