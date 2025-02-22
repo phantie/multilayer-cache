@@ -6,6 +6,7 @@ import json
 from functools import partial
 from typing import TypeAlias
 from typing import Any
+from typing import Optional
 
 import pydantic
 
@@ -111,8 +112,9 @@ class ParsedFile(pydantic.BaseModel):
 # you may clean it when a parser with a newer version is used
 # you may keep all the data
 # you may restrict it by size and keep the latest data
+# you may use database or network
 #
-# it's still your choice and an excercise to the reader)
+# it's still your choice and an exercise to the reader)
 class JsonParser:
     def version(self) -> ParserVersion:
         return "0"
@@ -175,4 +177,19 @@ result = parsed_files_cache_layer_partial(
 # as the result we've got a parsed file cached on all layers
 assert result == ParsedFile(key="a", value="a")
 
+
+########################################################################
+
+### The layers are implemented
+### But the composition is up to your imagination
+
+# for example we could provide a more user friendly interface
+def get_parsed_file(blob_id: BlobId, parser: JsonParser) -> Optional[ParsedFile]:
+    value = parsed_files_cache_layer_partial(
+        # provide blob_id as well as parser version
+        get_cache_key=lambda: (blob_id, parser.version()),
+        get_default=lambda: KEY_NOT_FOUND,
+    )
+
+    return None if value is KEY_NOT_FOUND else value
 
