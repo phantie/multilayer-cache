@@ -85,20 +85,22 @@ def cache_layer(
     # A way to get a cache key
     get_cache_key: Callable[[], K],
     # A way to use the key from local cache to get a value
-    get_cache_value: Callable[[K, D], T],
+    get_cache_value: Callable[[K, D], T | D],
     # A way to update local cache with the key and value
     set_cache_value: Callable[[K, T], None],
     # A way to get value from the dependant source with the key
-    on_cache_miss_source: Callable[[K, D], T],
+    on_cache_miss_source: Callable[[K, D], T | D],
     # A way to get a unique value the local cache and dependant source would return when the key not found
     get_default: Callable[[], D],
     # A way to get an identifier for a cache layer
     get_identifier: Callable[[], Any],
     # Handler of generated events, for example for testing and logging
     inspect: Callable[[CacheLayerInspect], None] = lambda _: None,
-) -> T:
+) -> T | D:
     ...
 ```
+
+### Constraints
 
 For nesting of layers L(0..N) to be possible (where L_0 is the most inner layer and L_N is the most outer layer)
 

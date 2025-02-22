@@ -8,6 +8,7 @@ from multilayer_cache import CacheLayerInspectMiss
 import json
 from functools import partial
 from typing import TypeAlias
+from typing import TypeVar
 from typing import Any
 from typing import Optional
 
@@ -49,7 +50,9 @@ files_inner_cache: FilesInnerCache = {}
 # let's match against generated events
 events = []
 
-def on_cache_miss_source(cache_key: BlobId, default) -> FileContents:
+D = TypeVar("D")
+
+def on_cache_miss_source(cache_key: BlobId, default: D) -> FileContents | D:
     blob_id = cache_key
     # it's important to enforce contract letting you know when value was not found
     # because most of the time a library would throw their own exception
@@ -167,7 +170,7 @@ ParsedFilesInnerCache: TypeAlias = dict[ParsedFilesKey, ParsedFileCompressed]
 
 parsed_files_inner_cache: FilesInnerCache = {}
 
-def on_cache_miss_source(cache_key: ParsedFilesKey, default) -> ParsedFile:
+def on_cache_miss_source(cache_key: ParsedFilesKey, default: D) -> ParsedFile | D:
     # inner layer requires only blob_id
     blob_id, _parser_version = cache_key
 

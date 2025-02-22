@@ -67,18 +67,18 @@ def cache_layer(
     # A way to get a cache key
     get_cache_key: Callable[[], K],
     # A way to use the key from local cache to get a value
-    get_cache_value: Callable[[K, D], T],
+    get_cache_value: Callable[[K, D], T | D],
     # A way to update local cache with the key and value
     set_cache_value: Callable[[K, T], None],
     # A way to get value from the dependant source with the key
-    on_cache_miss_source: Callable[[K, D], T],
+    on_cache_miss_source: Callable[[K, D], T | D],
     # A way to get a unique value the local cache and dependant source would return when the key not found
     get_default: Callable[[], D],
     # A way to get an identifier for a cache layer
     get_identifier: Callable[[], Any],
     # Handler of generated events, for example for testing and logging
     inspect: Callable[[CacheLayerInspect], None] = lambda _: None,
-) -> T:
+) -> T | D:
     cache_id = get_identifier()
 
     key = get_cache_key()
@@ -116,13 +116,13 @@ def cache_layer(
 
 async def async_cache_layer(
     get_cache_key: Callable[[], Awaitable[K]],
-    get_cache_value: Callable[[K, D], Awaitable[T]],
+    get_cache_value: Callable[[K, D], Awaitable[T | D]],
     set_cache_value: Callable[[K, T], Awaitable[None]],
-    on_cache_miss_source: Callable[[K, D], Awaitable[T]],
+    on_cache_miss_source: Callable[[K, D], Awaitable[T | D]],
     get_default: Callable[[], Awaitable[D]],
     get_identifier: Callable[[], Awaitable[Any]],
     inspect: Callable[[CacheLayerInspect], Awaitable[None]] = to_async(lambda _: None),
-) -> T:
+) -> T | D:
     cache_id = await get_identifier()
 
     key = await get_cache_key()
@@ -162,13 +162,13 @@ class type_hinted_cache_layer(Generic[T, K, D]):
     @staticmethod
     def new(
         get_cache_key: Callable[[], K],
-        get_cache_value: Callable[[K, D], T],
+        get_cache_value: Callable[[K, D], T | D],
         set_cache_value: Callable[[K, T], None],
-        on_cache_miss_source: Callable[[K, D], T],
+        on_cache_miss_source: Callable[[K, D], T | D],
         get_default: Callable[[], D],
         get_identifier: Callable[[], Any],
         inspect: Callable[[CacheLayerInspect], None] = lambda _: None,
-    ) -> T:
+    ) -> T | D:
         return cache_layer(
             get_cache_key=get_cache_key,
             get_cache_value=get_cache_value,
@@ -184,13 +184,13 @@ class type_hinted_async_cache_layer(Generic[T, K, D]):
     @staticmethod
     def new(
         get_cache_key: Callable[[], Awaitable[K]],
-        get_cache_value: Callable[[K, D], Awaitable[T]],
+        get_cache_value: Callable[[K, D], Awaitable[T | D]],
         set_cache_value: Callable[[K, T], Awaitable[None]],
-        on_cache_miss_source: Callable[[K, D], Awaitable[T]],
+        on_cache_miss_source: Callable[[K, D], Awaitable[T | D]],
         get_default: Callable[[], Awaitable[D]],
         get_identifier: Callable[[], Awaitable[Any]],
         inspect: Callable[[CacheLayerInspect], Awaitable[None]] = to_async(lambda _: None),
-    ) -> Awaitable[T]:
+    ) -> Awaitable[T | D]:
         return async_cache_layer(
             get_cache_key=get_cache_key,
             get_cache_value=get_cache_value,
