@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "multilayer-cache"
+version = "0.1.0"
+description = ""
+authors = ["<funtom1605@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pydantic = "^2.10.6"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.4"
+pytest-asyncio = "^0.25.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
