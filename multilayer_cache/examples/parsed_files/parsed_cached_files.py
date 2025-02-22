@@ -1,7 +1,6 @@
 from multilayer_cache import cache_layer
 from multilayer_cache import KEY_NOT_FOUND
 from multilayer_cache.examples.parsed_files.defs import BlobId
-from multilayer_cache.examples.parsed_files.parser import Parser
 
 from typing import TypeAlias
 import json

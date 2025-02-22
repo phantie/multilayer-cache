@@ -3,7 +3,7 @@ from multilayer_cache import KEY_NOT_FOUND
 from multilayer_cache.examples.parsed_files.defs import BlobId
 from multilayer_cache.examples.parsed_files.defs import FileContents
 from multilayer_cache.examples.parsed_files.defs import BaseModel
-from multilayer_cache.examples.parsed_files.bucket import Bucket
+from multilayer_cache.examples.parsed_files.defs import Bucket
 
 from typing import TypeAlias
 from functools import partial

@@ -4,7 +4,7 @@ from multilayer_cache.util import to_async
 from multilayer_cache.examples.async_cached_files.defs import BlobId
 from multilayer_cache.examples.async_cached_files.defs import FileContents
 from multilayer_cache.examples.async_cached_files.defs import BaseModel
-from multilayer_cache.examples.async_cached_files.bucket import Bucket
+from multilayer_cache.examples.async_cached_files.defs import Bucket
 
 from typing import TypeAlias
 from functools import partial

@@ -6,11 +6,10 @@ from multilayer_cache import CacheLayerInspectMiss
 from multilayer_cache.examples.parsed_files.defs import BlobId
 from multilayer_cache.examples.parsed_files.defs import ParserVersion
 from multilayer_cache.examples.parsed_files.defs import FileContents
-from multilayer_cache.examples.parsed_files.bucket import Bucket
+from multilayer_cache.examples.parsed_files.defs import Bucket
+from multilayer_cache.examples.parsed_files.defs import JsonParser
 from multilayer_cache.examples.parsed_files import parsed_cached_files
 from multilayer_cache.examples.parsed_files import cached_files
-from multilayer_cache.examples.parsed_files.parser import JsonParser
-from multilayer_cache.examples.parsed_files.parser import Parser
 
 import json
 from functools import partial

@@ -6,7 +6,7 @@ from multilayer_cache import CacheLayerInspectMiss
 from multilayer_cache.util import to_async
 from multilayer_cache.examples.async_cached_files.defs import BlobId
 from multilayer_cache.examples.async_cached_files.defs import FileContents
-from multilayer_cache.examples.async_cached_files.bucket import Bucket
+from multilayer_cache.examples.async_cached_files.defs import Bucket
 from multilayer_cache.examples.async_cached_files import cached_files
 
 import json
