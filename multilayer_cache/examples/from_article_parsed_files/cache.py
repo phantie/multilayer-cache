@@ -1,6 +1,9 @@
 from multilayer_cache import cache_layer
 from multilayer_cache import type_hinted_cache_layer
 from multilayer_cache import KEY_NOT_FOUND
+from multilayer_cache import CacheLayerInspect
+from multilayer_cache import CacheLayerInspectHit
+from multilayer_cache import CacheLayerInspectMiss
 
 import json
 from functools import partial
@@ -43,6 +46,9 @@ FilesInnerCache: TypeAlias = dict[BlobId, FileContents]
 # In memory solution is the shortest to demonstrate
 files_inner_cache: FilesInnerCache = {}
 
+# let's match against generated events
+events = []
+
 def on_cache_miss_source(cache_key: BlobId, default) -> FileContents:
     blob_id = cache_key
     # it's important to enforce contract letting you know when value was not found
@@ -58,6 +64,7 @@ files_cache_layer_partial = partial(
     on_cache_miss_source=on_cache_miss_source,
     # get_default=
     get_identifier=lambda: "raw_files",
+    inspect=lambda event: events.append(event),
 )
 
 # make a call with the key "a" (as we know the bucket has it)
@@ -71,6 +78,36 @@ result = files_cache_layer_partial(
 # and cached it locally
 # the same call would return already cached value
 assert result == '{"key": "a", "value": "a"}'
+
+
+match events:
+    # one miss event got generated, because the key was missing from cache
+    case [
+        CacheLayerInspect(identifier='raw_files', value=CacheLayerInspectMiss(key='a')),
+    ]:
+        pass
+    case _:
+        raise ValueError
+
+events.clear()
+
+
+# let's do the same call
+result = files_cache_layer_partial(
+    get_cache_key=lambda: "a",
+    get_default=lambda: KEY_NOT_FOUND,
+)
+
+match events:
+    # now it's a hit
+    case [
+        CacheLayerInspect(identifier='raw_files', value=CacheLayerInspectHit(key='a')),
+    ]:
+        pass
+    case _:
+        raise ValueError
+
+events.clear()
 
 
 # make a call with the key "c" (as we know the bucket does not have it)
