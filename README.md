@@ -132,7 +132,7 @@ D = TypeVar("D")
 
 ########################################################################
 
-### Mock blob storage as mapping from BlobId to FileContents
+### Define mock blob storage as a mapping from BlobId to FileContents.
 
 BlobId: TypeAlias = str
 FileContents: TypeAlias = str
@@ -152,26 +152,25 @@ bucket = Bucket(
 
 ########################################################################
 
-### Let's implement the first layer:
-### In memory cache layer preserving raw files
+### Let's implement the first layer: an in-memory cache layer preserving raw files.
 
 FilesInnerCache: TypeAlias = dict[BlobId, FileContents]
 
-# It doesn't enforce local cache managment
-# You may provide any, and manage as you like
-# In memory solution is the shortest to demonstrate
+# It doesn't enforce local cache management.
+# You may provide any and manage it as you like.
+# An in-memory solution is the shortest to demonstrate.
 files_inner_cache: FilesInnerCache = {}
 
-# let's match against generated events
+# Let's match against the generated events.
 events = []
 
 def on_cache_miss_source(cache_key: BlobId, default: D) -> FileContents | D:
     blob_id = cache_key
-    # it's important to enforce contract letting you know when value was not found
-    # because most of the time a library would throw their own exception
+    # It's important to enforce a contract that lets you know when a value was not found because
+    # most of the time, a library would throw its own exception.
     return bucket.get(blob_id, default)
 
-# bake in common params
+# Bake in common parameters
 files_cache_layer_partial = partial(
     cache_layer,
     # get_cache_key=
@@ -183,21 +182,20 @@ files_cache_layer_partial = partial(
     inspect=lambda event: events.append(event),
 )
 
-# make a call with the key "a" (as we know the bucket has it)
+# Make a call with the key "a" (we know the bucket has it).
 result = files_cache_layer_partial(
     get_cache_key=lambda: "a",
     # do not bake in default because outer layers provide their own
     get_default=lambda: KEY_NOT_FOUND,
 )
 
-# as expected, we received unchanged value from blob
-# and cached it locally
-# the same call would return already cached value
+# As expected, we received the unchanged value from the blob and cached it locally.
+# The same call would return the already cached value.
 assert result == '{"key": "a", "value": "a"}'
 
 
 match events:
-    # one miss event got generated, because the key was missing from cache
+    # One miss event was generated because the key was missing from the cache.
     case [
         CacheLayerInspect(identifier='raw_files', value=CacheLayerInspectMiss(key='a')),
     ]:
@@ -208,14 +206,14 @@ match events:
 events.clear()
 
 
-# let's do the same call
+# Let's do the same call
 result = files_cache_layer_partial(
     get_cache_key=lambda: "a",
     get_default=lambda: KEY_NOT_FOUND,
 )
 
 match events:
-    # now it's a hit
+    # Now it's a hit
     case [
         CacheLayerInspect(identifier='raw_files', value=CacheLayerInspectHit(key='a')),
     ]:
@@ -226,48 +224,45 @@ match events:
 events.clear()
 
 
-# make a call with the key "c" (as we know the bucket does not have it)
+# Make a call with the key "c" (we know the bucket does not have it).
 result = files_cache_layer_partial(
     get_cache_key=lambda: "c",
     get_default=lambda: KEY_NOT_FOUND,
 )
 
-# as expected, value was not found and nothing has changed
+# As expected, the value was not found, and nothing has changed.
 assert result is KEY_NOT_FOUND
-
 
 
 ########################################################################
 
-### Let's implement the second layer:
-### In memory cache of parsed files
+### Let's implement the second layer: an in-memory cache of parsed files.
 
-# to demonstrate more complex key usage
-# we'll version a parser
+# To demonstrate more complex key usage,
+# we'll version a parser.
 ParserVersion: TypeAlias = str
 
-# to demonstrate transformations to and out of local cache
-# we'll serialize model to string and back
+# To demonstrate transformations to and from the local cache,
+# we'll serialize the model to a string and back.
 ParsedFileCompressed: TypeAlias = str
 
-# to demonstrate transformation of value retrieved from dependant source
-# we'll parse it
+# To demonstrate the transformation of a value retrieved from a dependant source,
+# we'll parse it.
 class ParsedFile(pydantic.BaseModel):
     key: Any
     value: Any
 
 
-# it's common that parsers change
-# so data parsed with one version may not be compatible with another
-#
-# you are free manage (invalidate) local cache however you like in this regard
-#
-# you may clean it when a parser with a newer version is used
-# you may keep all the data
-# you may restrict it by size and keep the latest data
-# you may use database or network
-#
-# it's still your choice and an exercise to the reader)
+# It's common for parsers to change, so data parsed with one version may not be compatible with another.
+
+# You are free to manage (invalidate) the local cache however you like in this regard.
+
+# You may clean it when a parser with a newer version is used, 
+# keep all the data,
+# restrict it by size and keep the latest data,
+# or use a database or network.
+
+# It's still your choice and an exercise for the reader.
 class JsonParser:
     def version(self) -> ParserVersion:
         return "0"
@@ -284,29 +279,29 @@ ParsedFilesInnerCache: TypeAlias = dict[ParsedFilesKey, ParsedFileCompressed]
 parsed_files_inner_cache: FilesInnerCache = {}
 
 def on_cache_miss_source(cache_key: ParsedFilesKey, default: D) -> ParsedFile | D:
-    # inner layer requires only blob_id
+    # The inner layer requires only the blob_id.
     blob_id, _parser_version = cache_key
 
-    # use the raw files cache and provide a key and default
+    # Use the raw files cache and provide a key and a default.
     value = files_cache_layer_partial(
         get_cache_key=lambda: blob_id,
         get_default=lambda: default,
     )
 
-    # pop out the default
+    # Pop out the default.
     if value is default:
         return default
 
-    # transform found value to this cache return type
+    # Transform the found value to this cache return type.
     value = parser.parse(value)
 
-    # this value will be passed to be stored in the local cache
+    # This value will be passed to be stored in the local cache.
     return value
 
 
 parsed_files_cache_layer_partial = partial(
-    # type_hinted_cache_layer allows to type hint ahead of type
-    # making it better to work with lambdas
+    # The type_hinted_cache_layer allows you to type hint ahead of time,
+    # making it better to work with lambdas.
     type_hinted_cache_layer[ParsedFile, ParsedFilesKey, Any].new,
     # get_cache_key=
     on_cache_miss_source=on_cache_miss_source,
@@ -322,24 +317,22 @@ parsed_files_cache_layer_partial = partial(
 
 
 result = parsed_files_cache_layer_partial(
-    # provide blob_id as well as parser version
+    # Provide both the blob_id and the parser version.
     get_cache_key=lambda: ("a", parser.version()),
     get_default=lambda: KEY_NOT_FOUND,
 )
 
-# as the result we've got a parsed file cached on all layers
+# As a result, we've got a parsed file cached on all layers.
 assert result == ParsedFile(key="a", value="a")
 
 
 ########################################################################
 
-### The layers are implemented
-### But the composition is up to your imagination
+### The layers are implemented, but the composition is up to your imagination.
 
-# for example we could provide a more user friendly interface
+# For example, we could provide a more user-friendly interface.
 def get_parsed_file(blob_id: BlobId, parser: JsonParser) -> Optional[ParsedFile]:
     value = parsed_files_cache_layer_partial(
-        # provide blob_id as well as parser version
         get_cache_key=lambda: (blob_id, parser.version()),
         get_default=lambda: KEY_NOT_FOUND,
     )
