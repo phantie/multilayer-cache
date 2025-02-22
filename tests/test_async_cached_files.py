@@ -4,10 +4,10 @@ from multilayer_cache.core import CacheLayerInspect
 from multilayer_cache.core import CacheLayerInspectHit
 from multilayer_cache.core import CacheLayerInspectMiss
 from multilayer_cache.util import to_async
-from multilayer_cache.examples.async_parsed_files.defs import BlobId
-from multilayer_cache.examples.async_parsed_files.defs import FileContents
-from multilayer_cache.examples.async_parsed_files.bucket import Bucket
-from multilayer_cache.examples.async_parsed_files import cached_files
+from multilayer_cache.examples.async_cached_files.defs import BlobId
+from multilayer_cache.examples.async_cached_files.defs import FileContents
+from multilayer_cache.examples.async_cached_files.bucket import Bucket
+from multilayer_cache.examples.async_cached_files import cached_files
 
 import json
 from functools import partial
