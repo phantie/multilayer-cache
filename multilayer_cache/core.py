@@ -11,24 +11,28 @@ from typing import Awaitable
 import pydantic
 
 
+# For nesting of layers L(0..N) to be possible (where L_0 is the most inner layer and L_N is the most outer layer)
+#
+#
 # Represents value type a cache returns
 #
-# Different cache layers have diffent return types
-#
-# For nesting of layers L(0..N) to be possible (where L_0 is the most inner layer and L_N is the most outer layer)
-# T(0..N) must be such as there must exist a one-way transformation (morfism) T_0 -> T_N
-#
+# For T(0..N) must be such as there must exist a one-way transformation (morfism) T_0 -> T_N.
+# Simply, there must be a way to reduce a **value** passing from *inner to outer* layer.
 # For example, it works with bytes -> decoded bytes -> parsed json
-#
+# 
 # It's a formalization, but since constructing of cache happens from the ground up, it would be understood in the process
 #
 T = TypeVar("T")
 
 # Represent [K]ey used for retrieving from local cache or source
 #
-# Similar to return type in the sense of required transformation from layer to layer
+#
+# For K(0..N) must be such as there must exist a one-way transformation (morfism) K_N -> K_0.
+# Simply, there must be a way to reduce a **key** passing from *outer to inner* layer.
+#
 # There must be a transformation from type for most outer layer to most inner layer
-# Practically I implies that the key must contain all required info for dependant cache layers
+# Practically it implies that the key must contain all required info for dependant cache layers
+#
 K = TypeVar("K")
 
 # Represents unique (in "is" operation) [D]efault value that should be returned on not found key
