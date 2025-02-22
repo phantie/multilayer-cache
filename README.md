@@ -107,7 +107,7 @@ For example, it works with bytes -> decoded bytes -> parsed json
 K(0..N) must be such that, there must exist a one-way transformation (morfism) K_N -> K_0.
 Simply, there must be a way to reduce a **key** passing from *outer to inner* layer.
 
-### [multilayer_cache](https://github.com/phantie/multilayer-cache) is a library in Github containing cache_layer among other things (asynchronous and type hinted cache layer, examples)
+### [multilayer_cache](https://github.com/phantie/multilayer-cache) is a library containing cache_layer among other things (asynchronous and type hinted cache layer, examples)
 
 So let's implement the 2-layer example
 
