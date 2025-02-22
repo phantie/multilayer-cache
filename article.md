@@ -62,10 +62,50 @@ Implementing such caching still may be a challenge. The implementation may suffe
 
 - imposing too tight contracts and controlling inner cache
 
+- mixing-in more logic than necessary (due to lack of formalization and restrictions)
+
 ### Approach
 
 In implemenation the concern is too provide as flexible way to construct caches as possible.
-It's achieved by extracting imposing only the essential to the problem constraints
+It's achieved by imposing only the essential to the problem constraints
 (which at the same time provide freedom by enforcing similarity of different layers)
 
+### Python implementation
+
+```python
+# Represents value type a cache returns
+T = TypeVar("T")
+# Represent [K]ey used for retrieving from local cache or source
+K = TypeVar("K")
+# Represents unique (in "is" operation) [D]efault value that should be returned on not found key
+D = TypeVar("D")
+
+
+def cache_layer(
+    # A way to get a cache key
+    get_cache_key: Callable[[], K],
+    # A way to use the key from local cache to get a value
+    get_cache_value: Callable[[K, D], T],
+    # A way to update local cache with the key and value
+    set_cache_value: Callable[[K, T], None],
+    # A way to get value from the dependant source with the key
+    on_cache_miss_source: Callable[[K, D], T],
+    # A way to get a unique value the local cache and dependant source would return when the key not found
+    get_default: Callable[[], D],
+    # A way to get an identifier for a cache layer
+    get_identifier: Callable[[], Any],
+    # Handler of generated events, for example for testing and logging
+    inspect: Callable[[CacheLayerInspect], None] = lambda _: None,
+) -> T:
+    ...
+```
+
+For nesting of layers L(0..N) to be possible (where L_0 is the most inner layer and L_N is the most outer layer)
+
+For T(0..N) must be such as there must exist a one-way transformation (morfism) T_0 -> T_N.
+Simply, there must be a way to reduce a **value** passing from *inner to outer* layer.
+For example, it works with bytes -> decoded bytes -> parsed json
+
+For K(0..N) must be such as there must exist a one-way transformation (morfism) K_N -> K_0.
+Simply, there must be a way to reduce a **key** passing from *outer to inner* layer.
 
