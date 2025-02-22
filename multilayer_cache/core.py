@@ -13,7 +13,7 @@ import pydantic
 
 # Represents value type a cache returns
 T = TypeVar("T")
-# Represent [K]ey used for fetching from local cache or source
+# Represent [K]ey used for retrieving from local cache or source
 K = TypeVar("K")
 # Represents unique (in "is" operation) [D]efault value that should be returned on not found key
 D = TypeVar("D")
@@ -44,13 +44,19 @@ class CacheLayerInspect(BaseModel, Generic[K]):
 
 
 def cache_layer(
-    # 
+    # A way to get a cache key
     get_cache_key: Callable[[], K],
+    # A way to use the key from local cache to get a value
     get_cache_value: Callable[[K, D], T],
+    # A way to update local cache with the key and value
     set_cache_value: Callable[[K, T], None],
+    # A way to get value from the dependant source with the key
     on_cache_miss_source: Callable[[K, D], T],
+    # A way to get a unique value the local cache and dependant source would return when the key not found
     get_default: Callable[[], D],
+    # A way to get an identifier for a cache layer
     get_identifier: Callable[[], Any],
+    # Handler of generated events, for example for testing and logging
     inspect: Callable[[CacheLayerInspect], None] = lambda _: None,
 ) -> T:
     cache_id = get_identifier()
