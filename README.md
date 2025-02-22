@@ -340,6 +340,8 @@ def get_parsed_file(blob_id: BlobId, parser: JsonParser) -> Optional[ParsedFile]
     return None if value is KEY_NOT_FOUND else value
 ```
 
+### Async capabilities
+
 The [multilayer_cache](https://github.com/phantie/multilayer-cache) library also has an asynchronous cache layer (async_cache_layer). The difference is that it takes as arguments asynchronous functions instead of synchronous. See [async_cached_files](https://github.com/phantie/multilayer-cache/blob/main/tests/test_async_cached_files.py) example.
 
 Since retrieving values from the cache is a parallelizable operation when used with many keys, it would work nicely with asyncio.gather or asyncio.Semaphore.
