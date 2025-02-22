@@ -1,14 +1,10 @@
 # Multilayer caching
 
-Multilayered here means that one cache layer may depend on another, which in turn may depend on another...
-Also being capable of forming not only chains, but trees of dependent caches.
-Value retrievals update local cache of all downstream layers.
+"Multilayer" here means that one cache layer may depend on another, which, in turn, may depend on yet another. It is also capable of forming not only chains but also trees of dependent caches. Value retrievals update the local cache of all downstream layers.
 
 ## Our example
 
-For example, say, we have a files stored on an S3 bucket which we want to cache locally,
-and also cache the parsed data structures derived from these files.
-It gives us a 2-layer cache structure with Bucket as data source.
+For example, suppose we have files stored in an S3 bucket that we want to cache locally, and also cache the parsed data structures derived from these files. This results in a 2-layer cache structure, with the bucket serving as the data source.
 
 ```
 Bucket  
@@ -16,17 +12,20 @@ Bucket
  │   ├── Parsed File Cache  
 ```
 
-Say you want a parsed value. So you are concerned with **Parsed File Cache**.
+Say you want a parsed value, so you are concerned with the **Parsed File Cache**.
 
-With both local caches being empty, let's describe what would happen for the first time value retrieval.
+With both local caches empty, let's describe what happens during the first value retrieval.
 
-Since **Parsed File Cache** would *not* find it in local cache, then it would try to retrieve it from its dependant - **File Cache**.
+
+Since **Parsed File Cache** would *not* find it in the local cache, it would then try to retrieve it from its dependant - **File Cache**.
 **File Cache** would also *not* find a transformable value in its local cache, and to the dependant it goes - **Bucket**.
 
-**Bucket** may or may *not* have a value.
-If it doesn't - no local cache updates happen, and the result of retrieval from **Parsed File Cache** is a value standing for *Key not found*. But if it does, **File Cache** uses the retrieved value from **Bucket** and stores a transformed value in local cache, and **Parsed File Cache** does the same.
 
-When values found in local caches, the found values pop out as soon as found, and caches do not contact its dependants.
+**Bucket** may or may *not* have a value.
+If it doesn’t, no local cache updates occur, and the result of retrieval from **Parsed File Cache** is a value representing *Key not found*.
+But if it does, **File Cache** transforms the value retrieved from **Bucket**, stores the value in its local cache, and **Parsed File Cache** does the same.
+
+When values are found in local caches, they pop out immediately, and the caches do not contact their dependants.
 
 It's a simple recursive algorithm.
 
@@ -49,9 +48,7 @@ Bucket
 Implementing such caching still may be a challenge. The implementation may suffer from:
 
 - spagetti
-  (Having recursive nature, but of finite nesting. For your purposes
-  you may have started it with one layer, but after adding a layer or two more
-  the code started looking from afar like)
+(having a recursive nature, but with finite nesting. For your purposes, you might have started with one layer, but after adding a layer or two more, the code started looking like this from afar:)
 ```
 @@@@ outer layer get
   @@@@ middle layer get
@@ -60,15 +57,14 @@ Implementing such caching still may be a challenge. The implementation may suffe
 @@@@
 ```
 
-- imposing too tight contracts and controlling inner cache
+- imposing too tight contracts and controlling the local cache.
 
-- mixing-in more logic than necessary (due to lack of formalization and restrictions)
+- mixing in more logic than necessary (due to lack of formalization and restrictions).
+
 
 ### Approach
 
-In implemenation the concern is too provide as flexible way to construct caches as possible.
-It's achieved by imposing only the essential to the problem constraints
-(which at the same time provide freedom by enforcing similarity of different layers)
+In implementation, the concern is to provide the most flexible way to construct caches. This is achieved by imposing only the essential constraints to the problem, which, at the same time, provide freedom by enforcing similarity across different layers.
 
 ### Python implementation
 
@@ -353,7 +349,7 @@ def get_parsed_file(blob_id: BlobId, parser: JsonParser) -> Optional[ParsedFile]
 
 The [multilayer_cache](https://github.com/phantie/multilayer-cache) library also has an asynchronous cache layer (async_cache_layer). The difference is that it takes as arguments asynchronous functions instead of synchronous. See [async_cached_files](https://github.com/phantie/multilayer-cache/tree/main/multilayer_cache/examples/async_cached_files) example.
 
-And since retrieving values from cache is a parallelizable operation if used with many keys, it would nicely work with asyncio.gather or asyncio.Semaphore.
+Since retrieving values from the cache is a parallelizable operation when used with many keys, it would work nicely with asyncio.gather or asyncio.Semaphore.
 
 ## Conclusion
 
