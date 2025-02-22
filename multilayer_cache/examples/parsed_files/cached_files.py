@@ -1,5 +1,5 @@
-from multilayer_cache.core import cache_layer
-from multilayer_cache.core import KEY_NOT_FOUND
+from multilayer_cache import cache_layer
+from multilayer_cache import KEY_NOT_FOUND
 from multilayer_cache.examples.parsed_files.defs import BlobId
 from multilayer_cache.examples.parsed_files.defs import FileContents
 from multilayer_cache.examples.parsed_files.defs import BaseModel

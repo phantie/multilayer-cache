@@ -1,5 +1,5 @@
-from multilayer_cache.core import async_cache_layer
-from multilayer_cache.core import KEY_NOT_FOUND
+from multilayer_cache import async_cache_layer
+from multilayer_cache import KEY_NOT_FOUND
 from multilayer_cache.util import to_async
 from multilayer_cache.examples.async_cached_files.defs import BlobId
 from multilayer_cache.examples.async_cached_files.defs import FileContents

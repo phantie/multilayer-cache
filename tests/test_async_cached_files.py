@@ -1,8 +1,8 @@
 
-from multilayer_cache.core import KEY_NOT_FOUND
-from multilayer_cache.core import CacheLayerInspect
-from multilayer_cache.core import CacheLayerInspectHit
-from multilayer_cache.core import CacheLayerInspectMiss
+from multilayer_cache import KEY_NOT_FOUND
+from multilayer_cache import CacheLayerInspect
+from multilayer_cache import CacheLayerInspectHit
+from multilayer_cache import CacheLayerInspectMiss
 from multilayer_cache.util import to_async
 from multilayer_cache.examples.async_cached_files.defs import BlobId
 from multilayer_cache.examples.async_cached_files.defs import FileContents
