@@ -2,7 +2,7 @@
 name = "multilayer-cache"
 version = "0.1.0"
 description = ""
-authors = ["<funtom1605@gmail.com>"]
+authors = ["Alexander <funtom1605@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
